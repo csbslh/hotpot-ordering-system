@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN' 'https://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+<mapper namespace='com.cs.cs_hotpot_ordering_system.mapper.BrowseHistoryMapper'>
+    <!-- 查询用户浏览过的菜品及其点击次数。 -->
+    <select id='findByUserId' resultType='java.util.HashMap'>
+        SELECT h.id, h.userId, h.dishId, h.browseCount, h.lastBrowsedAt,
+               d.dishName, d.description, d.coverImage, d.price
+        FROM browseHistory h
+        JOIN dish d ON d.id = h.dishId
+        WHERE h.userId = #{userId}
+        ORDER BY h.lastBrowsedAt DESC
+    </select>
+    <!-- 第一次点击新增记录，后续点击累加 browseCount。 -->
+    <insert id='record'>
+        INSERT INTO browseHistory
+            (userId, dishId, browseCount, lastBrowsedAt)
+        VALUES
+            (#{userId}, #{dishId}, 1, NOW())
+        ON DUPLICATE KEY UPDATE
+            browseCount = browseCount + 1,
+            lastBrowsedAt = NOW()
+    </insert>
+    <!-- 清空指定用户的浏览记录。 -->
+    <delete id='clear'>
+        DELETE FROM browseHistory
+        WHERE userId = #{userId}
+    </delete>
+</mapper>

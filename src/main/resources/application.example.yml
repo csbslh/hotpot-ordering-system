@@ -1,0 +1,19 @@
+# 复制本文件为 application.yml，并填入你自己的数据库账号密码
+server:
+  # 后端服务端口，前端通过 http://localhost:8081/api 访问
+  port: 8081
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: your-password
+    url: jdbc:mysql://localhost:3306/cs_hotpot
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: false
+  global-config:
+    db-config:
+      table-underline: false

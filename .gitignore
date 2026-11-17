@@ -1,0 +1,48 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### 本地配置（含数据库密码，不入库）###
+/src/main/resources/application.yml
+
+### 前端依赖与构建产物 ###
+/frontend/node_modules/
+/frontend/dist/
+
+### 个人笔记与临时文件 ###
+/项目导读.md
+/面试考点全解析.md
+/苍穹外卖面试考点全解析.md
+/crop_result.py
+/assets/
+

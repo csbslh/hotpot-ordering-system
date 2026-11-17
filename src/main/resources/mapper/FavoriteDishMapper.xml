@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN' 'https://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+<mapper namespace='com.cs.cs_hotpot_ordering_system.mapper.FavoriteDishMapper'>
+    <!-- 查询用户收藏的菜品列表。 -->
+    <select id='findByUserId' resultType='java.util.HashMap'>
+        SELECT f.id, f.userId, f.dishId, f.createdAt,
+               d.dishName, d.description, d.coverImage, d.price
+        FROM favoriteDish f
+        JOIN dish d ON d.id = f.dishId
+        WHERE f.userId = #{userId}
+        ORDER BY f.createdAt DESC
+    </select>
+    <!-- 新增收藏；IGNORE 避免重复收藏报错。 -->
+    <insert id='add'>
+        INSERT IGNORE INTO favoriteDish
+            (userId, dishId)
+        VALUES
+            (#{userId}, #{dishId})
+    </insert>
+    <!-- 删除收藏关系。 -->
+    <delete id='remove'>
+        DELETE FROM favoriteDish
+        WHERE userId = #{userId}
+          AND dishId = #{dishId}
+    </delete>
+    <!-- 判断指定菜品是否已经被用户收藏。 -->
+    <select id='exists' resultType='boolean'>
+        SELECT EXISTS(
+            SELECT 1
+            FROM favoriteDish
+            WHERE userId = #{userId}
+              AND dishId = #{dishId}
+        )
+    </select>
+</mapper>

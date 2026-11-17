@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN' 'https://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+<mapper namespace='com.cs.cs_hotpot_ordering_system.mapper.OrderMapper'>
+    <!-- 查询指定用户的订单。 -->
+    <select id='findByUserId' resultType='java.util.HashMap'>
+        SELECT o.id, o.orderNumber, o.userId, o.tableId, o.totalAmount,
+               o.orderStatus, o.remark, o.orderedAt, o.completedAt,
+               t.tableNumber
+        FROM orders o
+        LEFT JOIN diningTable t ON t.id = o.tableId
+        WHERE o.userId = #{userId}
+        ORDER BY o.orderedAt DESC
+    </select>
+    <!-- 查询全部订单，并关联用户昵称和桌号。 -->
+    <select id='findAll' resultType='java.util.HashMap'>
+        SELECT o.id, o.orderNumber, o.userId, o.tableId, o.totalAmount,
+               o.orderStatus, o.remark, o.orderedAt,
+               u.nickname, t.tableNumber
+        FROM orders o
+        LEFT JOIN `user` u ON u.id = o.userId
+        LEFT JOIN diningTable t ON t.id = o.tableId
+        ORDER BY o.orderedAt DESC
+    </select>
+    <!-- 查询订单明细。 -->
+    <select id='findItems' resultType='java.util.HashMap'>
+        SELECT *
+        FROM orderItem
+        WHERE orderId = #{orderId}
+    </select>
+    <!-- 查询购物车内容，用于计算订单总金额。 -->
+    <select id='findCartItems' resultType='java.util.HashMap'>
+        SELECT c.dishId, c.quantity, d.dishName, d.price,
+               d.price * c.quantity AS subtotal
+        FROM cartItem c
+        JOIN dish d ON d.id = c.dishId
+        WHERE c.userId = #{userId}
+    </select>
+    <!-- 修改订单状态，完成订单时自动记录完成时间。 -->
+    <update id='updateStatus'>
+        UPDATE orders
+        SET orderStatus = #{orderStatus},
+            completedAt = CASE
+                WHEN #{orderStatus} = 'COMPLETED' THEN NOW()
+                ELSE completedAt
+            END
+        WHERE id = #{id}
+    </update>
+</mapper>

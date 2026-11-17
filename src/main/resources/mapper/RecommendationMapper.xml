@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN' 'https://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+<mapper namespace='com.cs.cs_hotpot_ordering_system.mapper.RecommendationMapper'>
+    <!-- 点击次数越多的菜品越优先推荐，没有点击记录时按热门程度兜底。 -->
+    <select id='findForUser' resultType='java.util.HashMap'>
+        SELECT d.id, d.categoryId, d.dishName, d.description, d.coverImage,
+               d.price, d.saleNumber, d.isRecommended, d.isNew,
+               COALESCE(clicks.clickCount, 0) AS clickCount,
+               CASE
+                   WHEN COALESCE(clicks.clickCount, 0) &gt; 0
+                       THEN '根据你的点击记录推荐'
+                   ELSE '本店热门菜品'
+               END AS recommendationReason
+        FROM dish d
+        LEFT JOIN (
+            SELECT dishId, SUM(browseCount) AS clickCount
+            FROM browseHistory
+            <where>
+                <if test='userId != null and userId &gt; 0'>
+                    userId = #{userId}
+                </if>
+            </where>
+            GROUP BY dishId
+        ) clicks ON clicks.dishId = d.id
+        WHERE d.status = 1
+        ORDER BY COALESCE(clicks.clickCount, 0) DESC,
+                 d.isRecommended DESC, d.saleNumber DESC
+        LIMIT #{limit}
+    </select>
+</mapper>

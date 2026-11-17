@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN' 'https://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+<mapper namespace='com.cs.cs_hotpot_ordering_system.mapper.CartItemMapper'>
+    <!-- 查询购物车，并计算每条明细的小计金额。 -->
+    <select id='findByUserId' resultType='java.util.HashMap'>
+        SELECT c.id, c.userId, c.dishId, c.quantity,
+               d.dishName, d.coverImage, d.price,
+               d.price * c.quantity AS subtotal
+        FROM cartItem c
+        JOIN dish d ON d.id = c.dishId
+        WHERE c.userId = #{userId}
+        ORDER BY c.createdAt DESC
+    </select>
+    <!-- 添加菜品；重复菜品只累加数量。 -->
+    <insert id='add'>
+        INSERT INTO cartItem
+            (userId, dishId, quantity)
+        VALUES
+            (#{userId}, #{dishId}, #{quantity})
+        ON DUPLICATE KEY UPDATE
+            quantity = quantity + #{quantity}
+    </insert>
+    <!-- 修改购物车记录。 -->
+    <update id='updateQuantity'>
+        UPDATE cartItem
+        SET quantity = #{quantity}
+        WHERE id = #{id}
+          AND userId = #{userId}
+    </update>
+    <!-- 删除购物车记录。 -->
+    <delete id='deleteItem'>
+        DELETE FROM cartItem
+        WHERE id = #{id}
+          AND userId = #{userId}
+    </delete>
+    <!-- 订单提交成功后清空指定用户的购物车。 -->
+    <delete id='clearByUser'>
+        DELETE FROM cartItem
+        WHERE userId = #{userId}
+    </delete>
+</mapper>

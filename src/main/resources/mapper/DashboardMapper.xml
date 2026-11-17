@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN' 'https://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+<mapper namespace='com.cs.cs_hotpot_ordering_system.mapper.DashboardMapper'>
+    <!-- 查询今日营业额、订单数和菜品销售数量。 -->
+    <select id='summary' resultType='java.util.HashMap'>
+        SELECT COALESCE(SUM(totalAmount), 0) AS todayAmount,
+               COUNT(*) AS todayOrderCount,
+               COALESCE(SUM(CASE WHEN orderStatus = 'PENDING' OR orderStatus = 'CONFIRMED' THEN 1 ELSE 0 END), 0) AS pendingOrderCount,
+               COALESCE(SUM(CASE WHEN orderStatus = 'COOKING' THEN 1 ELSE 0 END), 0) AS processingOrderCount,
+               COALESCE(SUM(CASE WHEN orderStatus = 'COMPLETED' THEN 1 ELSE 0 END), 0) AS completedOrderCount,
+               COALESCE(SUM(
+                   (SELECT COALESCE(SUM(quantity), 0)
+                    FROM orderItem oi
+                    WHERE oi.orderId = o.id)
+               ), 0) AS todayDishCount
+        FROM orders o
+        WHERE DATE(orderedAt) = CURDATE()
+          AND orderStatus &lt;&gt; 'CANCELLED'
+    </select>
+    <!-- 查询最近提交的订单。 -->
+    <select id='latestOrders' resultType='java.util.HashMap'>
+        SELECT o.orderNumber, o.totalAmount, o.orderStatus, o.orderedAt,
+               t.tableNumber, u.nickname
+        FROM orders o
+        LEFT JOIN `user` u ON u.id = o.userId
+        LEFT JOIN diningTable t ON t.id = o.tableId
+        ORDER BY o.orderedAt DESC
+        LIMIT #{limit}
+    </select>
+    <!-- 按销量倒序查询热销菜品。 -->
+    <select id='popularDishes' resultType='java.util.HashMap'>
+        SELECT id, dishName, price, saleNumber, coverImage
+        FROM dish
+        WHERE status = 1
+        ORDER BY saleNumber DESC
+        LIMIT #{limit}
+    </select>
+    <!-- 查询最近七天每天的营业额。 -->
+    <select id='dailyTrend' resultType='java.util.HashMap'>
+        SELECT DATE(orderedAt) AS day,
+               COALESCE(SUM(totalAmount), 0) AS amount
+        FROM orders
+        WHERE orderedAt >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+          AND orderStatus &lt;&gt; 'CANCELLED'
+        GROUP BY DATE(orderedAt)
+        ORDER BY day
+    </select>
+    <!-- 按桌台状态统计桌台数量。 -->
+    <select id='tableSummary' resultType='java.util.HashMap'>
+        SELECT tableStatus, COUNT(*) AS tableCount
+        FROM diningTable
+        GROUP BY tableStatus
+    </select>
+</mapper>

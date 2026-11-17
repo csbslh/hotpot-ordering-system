@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN' 'https://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+<mapper namespace='com.cs.cs_hotpot_ordering_system.mapper.ReviewMapper'>
+    <!-- 查询全部整体用餐评价，并关联用户昵称。 -->
+    <select id='findAll' resultType='java.util.HashMap'>
+        SELECT r.id, r.orderId, r.userId, r.dishId, r.rating, r.content,
+               r.replyContent, r.reviewStatus, r.createdAt,
+               u.nickname,
+               CASE WHEN r.dishId IS NULL THEN '本次用餐' ELSE d.dishName END AS reviewTarget
+        FROM dishReview r
+        LEFT JOIN `user` u ON u.id = r.userId
+        LEFT JOIN dish d ON d.id = r.dishId
+        ORDER BY r.createdAt DESC
+    </select>
+    <!-- 查询指定用户提交过的整体用餐评价。 -->
+    <select id='findByUser' resultType='java.util.HashMap'>
+        SELECT r.*,
+               CASE WHEN r.dishId IS NULL THEN '本次用餐' ELSE d.dishName END AS reviewTarget
+        FROM dishReview r
+        LEFT JOIN dish d ON d.id = r.dishId
+        WHERE r.userId = #{userId}
+        ORDER BY r.createdAt DESC
+    </select>
+    <!-- 保存一条整体用餐评价，dishId 留空。 -->
+    <insert id='insertReview'>
+        INSERT INTO dishReview
+            (orderId, userId, rating, content)
+        VALUES
+            (#{orderId}, #{userId}, #{rating}, #{content})
+    </insert>
+    <!-- 保存管理员对评价的回复。 -->
+    <update id='reply'>
+        UPDATE dishReview
+        SET replyContent = #{replyContent}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 用户只能删除自己的评价。 -->
+    <delete id='deleteByIdAndUser'>
+        DELETE FROM dishReview WHERE id = #{id} AND userId = #{userId}
+    </delete>
+    <!-- 用户只能在店家已回复且评价属于本人时追加回复。 -->
+    <update id='userReply'>
+        UPDATE dishReview
+        SET userReplyContent = #{userReplyContent}
+        WHERE id = #{id} AND userId = #{userId} AND replyContent IS NOT NULL AND replyContent &lt;&gt; &apos;&apos;
+    </update>
+</mapper>

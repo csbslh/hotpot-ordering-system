@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN' 'https://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+<mapper namespace='com.cs.cs_hotpot_ordering_system.mapper.DishCategoryMapper'>
+    <!-- 查询启用的分类，并按排序号升序返回。 -->
+    <select id='findAll' resultType='com.cs.cs_hotpot_ordering_system.entity.DishCategory'>
+        SELECT *
+        FROM dishCategory
+        WHERE status = 1
+        ORDER BY sortNumber, id
+    </select>
+    <!-- 修改分类名称和排序号。 -->
+    <update id='updateCategory'>
+        UPDATE dishCategory
+        SET categoryName = #{category.categoryName},
+            sortNumber = #{category.sortNumber}
+        WHERE id = #{id}
+    </update>
+    <!-- 逻辑删除分类，只把状态改为停用。 -->
+    <update id='deleteCategory'>
+        UPDATE dishCategory
+        SET status = 0
+        WHERE id = #{id}
+    </update>
+</mapper>

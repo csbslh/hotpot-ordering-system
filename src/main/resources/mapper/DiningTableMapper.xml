@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN' 'https://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+<mapper namespace='com.cs.cs_hotpot_ordering_system.mapper.DiningTableMapper'>
+    <!-- 查询全部桌台。 -->
+    <select id='findAll' resultType='com.cs.cs_hotpot_ordering_system.entity.DiningTable'>
+        SELECT *
+        FROM diningTable
+        ORDER BY tableNumber
+    </select>
+    <!-- 修改桌台的使用状态。 -->
+    <update id='updateStatus'>
+        UPDATE diningTable
+        SET tableStatus = #{tableStatus}
+        WHERE id = #{id}
+    </update>
+</mapper>
